@@ -1,0 +1,72 @@
+/**
+ * Separate data into tabs with frozen rows and format all tabs and sheets as text
+ * 
+ * This function separates rows of data into individual tabs based on a specified column (column C by default).
+ * Each tab represents a unique value found in the specified column.
+ * The script copies the header row to each tab and freezes the top row for easy navigation.
+ * Additionally, it applies the formatting of the header row to each tab and formats all tabs and sheets as text.
+ * 
+ * Instructions for Use:
+ * 1. Open your Google Sheets document.
+ * 2. Go to "Extensions" in the menu and click on "Apps Script".
+ * 3. Delete any code in the script editor and paste the provided script.
+ * 4. Adjust the column index and range if necessary.
+ * 5. Save the script by clicking the disk icon or pressing Ctrl + S.
+ * 6. Close the script editor.
+ * 7. Run the script by going to "Run" > "Run function" > "separateDataIntoTabsWithFrozenRowsAndTextFormatting".
+ */
+
+function separateDataIntoTabsWithFrozenRowsAndTextFormatting() {
+  // Get the active sheet
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  // Get the data range and values
+  var dataRange = sheet.getDataRange();
+  var values = dataRange.getValues();
+  
+  // Get the header row and its formatting
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]; // Assuming row 1 contains headers
+  var headerFormatting = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getBackgrounds(); // Get formatting of header row
+  
+  // Find unique values in the specified column (column C by default)
+  var uniqueValues = [];
+  for (var i = 1; i < values.length; i++) {
+    var value = values[i][2]; // Assuming column C is the third column (index 2)
+    if (uniqueValues.indexOf(value) === -1 && value !== "") {
+      uniqueValues.push(value);
+    }
+  }
+  
+  // Iterate through unique values and create tabs
+  for (var i = 0; i < uniqueValues.length; i++) {
+    // Initialize filtered rows with headers
+    var filteredRows = [headers];
+    
+    // Filter rows based on the unique value
+    for (var j = 1; j < values.length; j++) {
+      if (values[j][2] === uniqueValues[i]) { // Assuming column C is the third column (index 2)
+        filteredRows.push(values[j]);
+      }
+    }
+    
+    // Insert a new sheet for each unique value
+    var newSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet();
+    newSheet.setName(uniqueValues[i]);
+    
+    // Set header row values and formatting
+    newSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    newSheet.getRange(1, 1, 1, headers.length).setBackgrounds(headerFormatting);
+    
+    // Set remaining rows
+    newSheet.getRange(2, 1, filteredRows.length - 1, headers.length).setValues(filteredRows.slice(1));
+    
+    // Freeze top row
+    newSheet.setFrozenRows(1);
+    
+    // Set sheet format as text
+    newSheet.getDataRange().setNumberFormat('@');
+  }
+  
+  // Set active sheet format as text
+  sheet.getDataRange().setNumberFormat('@');
+}
