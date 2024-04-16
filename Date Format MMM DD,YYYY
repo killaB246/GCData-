@@ -1,33 +1,31 @@
-function formatDate() {
+function formatDateInColumnT() {
   // Get the active sheet
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   
-  // Get the range containing the dates to be formatted
-  var range = sheet.getDataRange();
+  // Get the range containing the dates to be formatted in Column T
+  var range = sheet.getRange("T:T");
   
   // Get the values from the range
   var values = range.getValues();
   
   // Loop through each cell in the range
   for (var i = 0; i < values.length; i++) {
-    for (var j = 0; j < values[i].length; j++) {
-      // Check if the cell contains a date in the "MMM DD, YYYY" format
-      if (typeof values[i][j] === 'object' && values[i][j] instanceof Date) {
+    // Check if the cell contains a date in the "MMM DD, YYYY" format
+    if (typeof values[i][0] === 'object' && values[i][0] instanceof Date) {
+      // Format the date as "MMM DD, YYYY"
+      var formattedDate = Utilities.formatDate(values[i][0], Session.getScriptTimeZone(), 'MMM dd, yyyy');
+      
+      // Set the formatted date back to the cell
+      range.getCell(i + 1, 1).setValue(formattedDate);
+    } else if (typeof values[i][0] === 'string') {
+      // Check if the cell contains a date in the "Thu Nov 03 00:00:00 EDT 2022" format
+      var dateFromText = new Date(values[i][0]);
+      if (!isNaN(dateFromText.getTime())) {
         // Format the date as "MMM DD, YYYY"
-        var formattedDate = Utilities.formatDate(values[i][j], Session.getScriptTimeZone(), 'MMM dd, yyyy');
+        var formattedDateFromText = Utilities.formatDate(dateFromText, Session.getScriptTimeZone(), 'MMM dd, yyyy');
         
         // Set the formatted date back to the cell
-        sheet.getRange(i + 1, j + 1).setValue(formattedDate);
-      } else if (typeof values[i][j] === 'string') {
-        // Check if the cell contains a date in the "Thu Nov 03 00:00:00 EDT 2022" format
-        var dateFromText = new Date(values[i][j]);
-        if (!isNaN(dateFromText.getTime())) {
-          // Format the date as "MMM DD, YYYY"
-          var formattedDateFromText = Utilities.formatDate(dateFromText, Session.getScriptTimeZone(), 'MMM dd, yyyy');
-          
-          // Set the formatted date back to the cell
-          sheet.getRange(i + 1, j + 1).setValue(formattedDateFromText);
-        }
+        range.getCell(i + 1, 1).setValue(formattedDateFromText);
       }
     }
   }
