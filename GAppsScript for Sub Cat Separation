@@ -1,10 +1,10 @@
 /**
- * Separate data into tabs with frozen rows and format all tabs and sheets as text
+ * Separate data into tabs with frozen rows and copy date format in column T to be MMM DD, YYYY
  * 
  * This function separates rows of data into individual tabs based on a specified column (column C by default).
  * Each tab represents a unique value found in the specified column.
  * The script copies the header row to each tab and freezes the top row for easy navigation.
- * Additionally, it applies the formatting of the header row to each tab and formats all tabs and sheets as text.
+ * Additionally, it applies the formatting of the header row to each tab and copies the date format in column T to be "MMM DD, YYYY".
  * 
  * Instructions for Use:
  * 1. Open your Google Sheets document.
@@ -13,16 +13,22 @@
  * 4. Adjust the column index and range if necessary.
  * 5. Save the script by clicking the disk icon or pressing Ctrl + S.
  * 6. Close the script editor.
- * 7. Run the script by going to "Run" > "Run function" > "separateDataIntoTabsWithFrozenRowsAndTextFormatting".
+ * 7. Run the script by going to "Run" > "Run function" > "separateDataIntoTabsWithFrozenRowsAndDateFormatting".
  */
 
-function separateDataIntoTabsWithFrozenRowsAndTextFormatting() {
+function separateDataIntoTabsWithFrozenRowsAndDateFormatting() {
   // Get the active sheet
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   
   // Get the data range and values
   var dataRange = sheet.getDataRange();
   var values = dataRange.getValues();
+  
+  // Get the number format of column T
+  var tColumnNumberFormat = sheet.getRange(1, 20).getNumberFormat(); // Assuming column T is the 20th column
+  
+  // Get the date format as "MMM DD, YYYY"
+  var newDateFormat = "MMM DD, YYYY";
   
   // Get the header row and its formatting
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]; // Assuming row 1 contains headers
@@ -57,16 +63,11 @@ function separateDataIntoTabsWithFrozenRowsAndTextFormatting() {
     newSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     newSheet.getRange(1, 1, 1, headers.length).setBackgrounds(headerFormatting);
     
-    // Set remaining rows
+    // Set remaining rows and copy date format in column T to be "MMM DD, YYYY"
     newSheet.getRange(2, 1, filteredRows.length - 1, headers.length).setValues(filteredRows.slice(1));
+    newSheet.getRange(2, 20, filteredRows.length - 1, 1).setNumberFormat(newDateFormat);
     
     // Freeze top row
     newSheet.setFrozenRows(1);
-    
-    // Set sheet format as text
-    newSheet.getDataRange().setNumberFormat('@');
   }
-  
-  // Set active sheet format as text
-  sheet.getDataRange().setNumberFormat('@');
 }
